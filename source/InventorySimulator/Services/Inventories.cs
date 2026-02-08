@@ -20,8 +20,15 @@ public static class Inventories
     {
         try
         {
-            var path = Path.Combine(Server.GameDirectory, _inventoryFileDir, filename);
-            if (!File.Exists(path))
+            var candidates = new[]
+            {
+                Path.Combine(Server.GameDirectory, _inventoryFileDir, filename),
+                Path.Combine(Server.GameDirectory, "csgo", filename),
+            };
+            var path =
+                candidates.FirstOrDefault(File.Exists)
+                ?? (Path.IsPathRooted(filename) && File.Exists(filename) ? filename : null);
+            if (path == null)
                 return false;
             string json = File.ReadAllText(path);
             var inventories = JsonSerializer.Deserialize<Dictionary<ulong, PlayerInventory>>(json);
